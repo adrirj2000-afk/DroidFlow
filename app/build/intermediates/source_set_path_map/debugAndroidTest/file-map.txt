@@ -1,4 +1,0 @@
-com.droidflow.test.app-androidTest-0 C:\Users\adrir\Desktop\DroidFLow\DroidFlowNative\app\build\generated\res\resValues\androidTest\debug
-com.droidflow.test.app-mergeDebugAndroidTestResources-1 C:\Users\adrir\Desktop\DroidFLow\DroidFlowNative\app\build\intermediates\incremental\debugAndroidTest\mergeDebugAndroidTestResources\merged.dir
-com.droidflow.test.app-mergeDebugAndroidTestResources-2 C:\Users\adrir\Desktop\DroidFLow\DroidFlowNative\app\build\intermediates\incremental\debugAndroidTest\mergeDebugAndroidTestResources\stripped.dir
-com.droidflow.test.app-merged_res-3 C:\Users\adrir\Desktop\DroidFLow\DroidFlowNative\app\build\intermediates\merged_res\debugAndroidTest

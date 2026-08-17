@@ -26,6 +26,9 @@ interface FlowDao {
     @Update
     suspend fun updateFlow(flow: FlowEntity)
 
+    @Query("UPDATE flows SET isEnabled = :isEnabled WHERE id = :id")
+    suspend fun updateFlowState(id: Long, isEnabled: Boolean)
+
     @Delete
     suspend fun deleteFlow(flow: FlowEntity)
 }

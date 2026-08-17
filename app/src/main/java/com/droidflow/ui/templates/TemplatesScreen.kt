@@ -31,6 +31,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.droidflow.ui.home.FlowViewModel
 import com.droidflow.data.local.FlowEntity
@@ -149,18 +155,18 @@ fun TemplatesScreen(
                 actionsJson = "[{\"type\":\"VIBRATE\"}]"
             ),
             TemplateData(
-                title = "Llegar a casa",
-                description = "Conecta el Wi-Fi y ajusta el volumen al llegar a casa.",
-                icon = Icons.Outlined.Home,
+                title = "Modo Trabajo",
+                description = "Silencia el volumen y activa el No Molestar al llegar a la oficina.",
+                icon = Icons.Outlined.Work,
                 iconColor = Color(0xFF4CAF50),
                 actionsCount = 2,
-                previewIcons = listOf(Icons.Outlined.LocationOn, Icons.Outlined.Wifi),
+                previewIcons = listOf(Icons.Outlined.Wifi, Icons.Outlined.VolumeOff),
                 glowColor = Color(0xFF4CAF50),
                 isPrimary = true,
-                category = "Casa",
-                triggerType = "MANUAL",
-                conditionsJson = "[]",
-                actionsJson = "[{\"type\":\"WIFI\", \"enable\":true}, {\"type\":\"VOLUME\", \"level\":60}]"
+                category = "Trabajo",
+                triggerType = "WIFI",
+                conditionsJson = "[\"Oficina_5G\"]",
+                actionsJson = "[{\"type\":\"DND\", \"enable\":true}, {\"type\":\"VOLUME\", \"level\":0}]"
             ),
             TemplateData(
                 title = "Audio Bluetooth",
@@ -207,7 +213,20 @@ fun TemplatesScreen(
         )
         
         var showNameDialog by remember { mutableStateOf<TemplateData?>(null) }
+        var showWifiDialog by remember { mutableStateOf<TemplateData?>(null) }
+        var showTimeDialog by remember { mutableStateOf<TemplateData?>(null) }
         var customName by remember { mutableStateOf("") }
+        val context = LocalContext.current
+        var pendingWifiTemplate by remember { mutableStateOf<TemplateData?>(null) }
+        
+        val locationPermissionLauncher = rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.RequestPermission(),
+            onResult = { isGranted ->
+                if (isGranted) {
+                    showWifiDialog = pendingWifiTemplate
+                }
+            }
+        )
 
         val displayedTemplates = if (selectedFilter == "Populares") {
             templates
@@ -222,10 +241,173 @@ fun TemplatesScreen(
         ) {
             items(displayedTemplates) { template ->
                 TemplateCard(template, onUseTemplate = {
-                    customName = template.title
-                    showNameDialog = template
+                    if (template.triggerType == "WIFI") {
+                        if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                            showWifiDialog = template
+                        } else {
+                            pendingWifiTemplate = template
+                            locationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+                        }
+                    } else if (template.triggerType == "TIME") {
+                        showTimeDialog = template
+                    } else {
+                        customName = template.title
+                        showNameDialog = template
+                    }
                 })
             }
+        }
+
+        if (showTimeDialog != null) {
+            val template = showTimeDialog!!
+            var startTime by remember { mutableStateOf("23:00") }
+            var endTime by remember { mutableStateOf("07:00") }
+            
+            val calendar = java.util.Calendar.getInstance()
+            
+            val startTimePickerDialog = android.app.TimePickerDialog(
+                context,
+                { _, hour: Int, minute: Int ->
+                    startTime = String.format("%02d:%02d", hour, minute)
+                }, calendar.get(java.util.Calendar.HOUR_OF_DAY), calendar.get(java.util.Calendar.MINUTE), true
+            )
+            
+            val endTimePickerDialog = android.app.TimePickerDialog(
+                context,
+                { _, hour: Int, minute: Int ->
+                    endTime = String.format("%02d:%02d", hour, minute)
+                }, calendar.get(java.util.Calendar.HOUR_OF_DAY), calendar.get(java.util.Calendar.MINUTE), true
+            )
+
+            AlertDialog(
+                onDismissRequest = { showTimeDialog = null },
+                title = { Text("Configurar Horario") },
+                text = {
+                    Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                        Text("Selecciona cuándo se activa y desactiva '${template.title}'", style = MaterialTheme.typography.bodyMedium)
+                        
+                        OutlinedCard(
+                            onClick = { startTimePickerDialog.show() },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text("Hora de Inicio")
+                                Text(startTime, fontWeight = FontWeight.Bold)
+                            }
+                        }
+                        
+                        OutlinedCard(
+                            onClick = { endTimePickerDialog.show() },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text("Hora de Fin")
+                                Text(endTime, fontWeight = FontWeight.Bold)
+                            }
+                        }
+                    }
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            val newFlow = FlowEntity(
+                                name = template.title,
+                                description = template.description,
+                                isEnabled = false,
+                                triggerType = template.triggerType,
+                                conditionsJson = "[\"$startTime\", \"$endTime\"]",
+                                actionsJson = template.actionsJson
+                            )
+                            viewModel.insertFlow(newFlow)
+                            showTimeDialog = null
+                            onNavigateHome()
+                        }
+                    ) {
+                        Text("Guardar")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showTimeDialog = null }) {
+                        Text("Cancelar")
+                    }
+                }
+            )
+        }
+
+        if (showWifiDialog != null) {
+            val template = showWifiDialog!!
+            var selectedWifi by remember { mutableStateOf("") }
+            val templatesViewModel: TemplatesViewModel = hiltViewModel()
+            val wifiNetworks = remember { templatesViewModel.getAvailableWifiNetworks(context) }
+            
+            AlertDialog(
+                onDismissRequest = { showWifiDialog = null },
+                title = { Text("Seleccionar Red Wi-Fi") },
+                text = {
+                    Column {
+                        Text("Elige la red Wi-Fi para activar '${template.title}'", style = MaterialTheme.typography.bodyMedium)
+                        Spacer(modifier = Modifier.height(16.dp))
+                        LazyColumn(modifier = Modifier.heightIn(max = 200.dp)) {
+                            items(wifiNetworks) { network ->
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clickable { selectedWifi = network }
+                                        .padding(vertical = 12.dp, horizontal = 8.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    RadioButton(
+                                        selected = selectedWifi == network,
+                                        onClick = { selectedWifi = network }
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(network)
+                                }
+                            }
+                            if (wifiNetworks.isEmpty()) {
+                                item {
+                                    Text("No se encontraron redes guardadas.", color = MaterialTheme.colorScheme.error)
+                                }
+                            }
+                        }
+                    }
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            if (selectedWifi.isNotEmpty()) {
+                                val newFlow = FlowEntity(
+                                    name = template.title,
+                                    description = template.description,
+                                    isEnabled = false,
+                                    triggerType = template.triggerType,
+                                    conditionsJson = "[\"$selectedWifi\"]",
+                                    actionsJson = template.actionsJson
+                                )
+                                viewModel.insertFlow(newFlow)
+                                showWifiDialog = null
+                                onNavigateHome()
+                            }
+                        },
+                        enabled = selectedWifi.isNotEmpty()
+                    ) {
+                        Text("Guardar")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showWifiDialog = null }) {
+                        Text("Cancelar")
+                    }
+                }
+            )
         }
 
         if (showNameDialog != null) {

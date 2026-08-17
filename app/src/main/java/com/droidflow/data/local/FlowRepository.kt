@@ -19,6 +19,8 @@ class FlowRepository @Inject constructor(
 
     suspend fun updateFlow(flow: FlowEntity) = flowDao.updateFlow(flow)
 
+    suspend fun updateFlowState(id: Long, isEnabled: Boolean) = flowDao.updateFlowState(id, isEnabled)
+
     suspend fun deleteFlow(flow: FlowEntity) = flowDao.deleteFlow(flow)
 
     fun getHistoryForFlow(flowId: Long): Flow<List<HistoryEntity>> = historyDao.getHistoryForFlow(flowId)

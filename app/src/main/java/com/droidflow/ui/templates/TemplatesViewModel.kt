@@ -4,6 +4,8 @@
  */
 package com.droidflow.ui.templates
 
+import android.content.Context
+import android.net.wifi.WifiManager
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.droidflow.data.local.FlowDao
@@ -53,14 +55,32 @@ class TemplatesViewModel @Inject constructor(
         )
     )
 
-    fun applyTemplate(template: Template) {
+    fun getAvailableWifiNetworks(context: Context): List<String> {
+        val wifiManager = context.applicationContext.getSystemService(Context.WIFI_SERVICE) as? WifiManager
+        val networks = mutableListOf<String>()
+        try {
+            val configuredNetworks = wifiManager?.configuredNetworks
+            configuredNetworks?.forEach { config ->
+                // Remove quotes from SSID
+                val ssid = config.SSID?.replace("\"", "")
+                if (!ssid.isNullOrBlank()) {
+                    networks.add(ssid)
+                }
+            }
+        } catch (e: SecurityException) {
+            // Permission missing
+        }
+        return networks.distinct()
+    }
+
+    fun applyTemplate(template: Template, customConditionsJson: String? = null) {
         viewModelScope.launch {
             val flow = FlowEntity(
                 name = template.name,
                 description = template.description,
                 isEnabled = false,
                 triggerType = template.triggerType,
-                conditionsJson = template.conditionsJson,
+                conditionsJson = customConditionsJson ?: template.conditionsJson,
                 actionsJson = template.actionsJson
             )
             flowDao.insertFlow(flow)

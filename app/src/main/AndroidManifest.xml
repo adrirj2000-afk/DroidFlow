@@ -66,10 +66,12 @@
             android:foregroundServiceType="specialUse"
             android:exported="false" />
 
-        <receiver android:name=".domain.engine.SystemStateReceiver" android:exported="true">
+        <receiver android:name=".engine.receivers.SystemEventReceiver" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.AIRPLANE_MODE" />
                 <action android:name="android.net.wifi.WIFI_STATE_CHANGED" />
+                <action android:name="android.intent.action.BATTERY_LOW" />
+                <action android:name="android.intent.action.BATTERY_OKAY" />
             </intent-filter>
         </receiver>
 

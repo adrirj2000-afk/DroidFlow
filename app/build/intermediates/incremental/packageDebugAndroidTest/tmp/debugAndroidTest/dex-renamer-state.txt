@@ -1,0 +1,4 @@
+#Mon Aug 17 20:17:05 CEST 2026
+base.0=C\:\\Users\\adrir\\Desktop\\DroidFLow\\DroidFlowNative\\app\\build\\intermediates\\dex\\debugAndroidTest\\mergeProjectDexDebugAndroidTest\\0\\classes.dex
+path.0=0/classes.dex
+renamed.0=classes.dex

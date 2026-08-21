@@ -31,7 +31,7 @@ Tareas que el motor ejecutará automáticamente:
 - **Dispositivo:** Control de brillo, volumen, linterna, modo no molestar (DND), ahorro de batería.
 - **Conectividad:** Control de Bluetooth y Wi-Fi.
 - **Multimedia:** Reproducir/Pausar música, pasar de canción, reproducir sonidos de alerta, Texto-A-Voz (TTS).
-- **Comunicación:** Enviar SMS silenciosos y programar **Mwnsajes de WhatsApp**.
+- **Comunicación:** Enviar SMS silenciosos y programar **Mensajes de WhatsApp**.
 - **Sistema:** Abrir aplicaciones, cambiar fondo de pantalla, bloquear/apagar pantalla.
 - **Avanzado:** Notificaciones personalizadas, vibraciones hápticas, y Peticiones HTTP para integraciones con domótica.
 

@@ -7,6 +7,7 @@ package com.droidflow.domain.engine
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
+import android.telephony.TelephonyManager
 import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
@@ -211,17 +212,9 @@ class WifiAction(val enable: Boolean) : Action {
     override suspend fun execute(context: Context) {
         withContext(Dispatchers.Main) {
             try {
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
-                    // Android 10+ blocks silent Wi-Fi toggles. We must show the system panel.
-                    val intent = android.content.Intent(android.provider.Settings.Panel.ACTION_WIFI)
-                    intent.flags = android.content.Intent.FLAG_ACTIVITY_NEW_TASK
-                    context.startActivity(intent)
-                    android.widget.Toast.makeText(context, "Android requiere confirmación manual para el Wi-Fi en esta versión.", android.widget.Toast.LENGTH_LONG).show()
-                } else {
-                    @Suppress("DEPRECATION")
-                    val wifiManager = context.applicationContext.getSystemService(Context.WIFI_SERVICE) as android.net.wifi.WifiManager
-                    wifiManager.isWifiEnabled = enable
-                }
+                @Suppress("DEPRECATION")
+                val wifiManager = context.applicationContext.getSystemService(Context.WIFI_SERVICE) as android.net.wifi.WifiManager
+                wifiManager.isWifiEnabled = enable
             } catch (e: Exception) {
                 e.printStackTrace()
             }
@@ -233,23 +226,11 @@ class BluetoothAction(val enable: Boolean) : Action {
     override suspend fun execute(context: Context) {
         withContext(Dispatchers.Main) {
             try {
-                // For Android 13+, BLUETOOTH_CONNECT permission is required.
-                // Toggling BT silently might also be restricted on some custom ROMs.
                 @Suppress("DEPRECATION")
                 val bluetoothAdapter = android.bluetooth.BluetoothAdapter.getDefaultAdapter()
-                val success = if (enable) bluetoothAdapter?.enable() else bluetoothAdapter?.disable()
-                
-                if (success != true && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-                     val intent = android.content.Intent(android.provider.Settings.ACTION_BLUETOOTH_SETTINGS)
-                     intent.flags = android.content.Intent.FLAG_ACTIVITY_NEW_TASK
-                     context.startActivity(intent)
-                     android.widget.Toast.makeText(context, "Por seguridad, debes cambiar el Bluetooth manualmente.", android.widget.Toast.LENGTH_LONG).show()
-                }
+                if (enable) bluetoothAdapter?.enable() else bluetoothAdapter?.disable()
             } catch (e: Exception) {
                 e.printStackTrace()
-                val intent = android.content.Intent(android.provider.Settings.ACTION_BLUETOOTH_SETTINGS)
-                intent.flags = android.content.Intent.FLAG_ACTIVITY_NEW_TASK
-                context.startActivity(intent)
             }
         }
     }
@@ -348,6 +329,53 @@ class WhatsAppAction(val phoneNumber: String, val message: String) : Action {
                 intent.setPackage("com.whatsapp")
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 context.startActivity(intent)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+}
+
+class SystemButtonAction(val button: String) : Action {
+    override suspend fun execute(context: Context) {
+        withContext(Dispatchers.Main) {
+            try {
+                val service = DroidFlowAccessibilityService.instance
+                if (service != null) {
+                    val actionCode = when (button) {
+                        "HOME" -> android.accessibilityservice.AccessibilityService.GLOBAL_ACTION_HOME
+                        "BACK" -> android.accessibilityservice.AccessibilityService.GLOBAL_ACTION_BACK
+                        "RECENTS" -> android.accessibilityservice.AccessibilityService.GLOBAL_ACTION_RECENTS
+                        else -> return@withContext
+                    }
+                    service.performGlobalAction(actionCode)
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+}
+
+class RejectCallAction : Action {
+    override suspend fun execute(context: Context) {
+        withContext(Dispatchers.Main) {
+            try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                    val telecomManager = context.getSystemService(Context.TELECOM_SERVICE) as android.telecom.TelecomManager
+                    telecomManager.endCall()
+                } else {
+                    // Reflection fallback for older Android versions
+                    val telephonyManager = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
+                    val clazz = Class.forName(telephonyManager.javaClass.name)
+                    val method = clazz.getDeclaredMethod("getITelephony")
+                    method.isAccessible = true
+                    val telephonyService = method.invoke(telephonyManager)
+                    val telephonyServiceClass = Class.forName(telephonyService.javaClass.name)
+                    val endCallMethod = telephonyServiceClass.getDeclaredMethod("endCall")
+                    endCallMethod.isAccessible = true
+                    endCallMethod.invoke(telephonyService)
+                }
             } catch (e: Exception) {
                 e.printStackTrace()
             }

@@ -48,4 +48,21 @@ object PermissionUtils {
 
         return permissions.toList()
     }
+
+    fun checkSpecialPermissions(context: android.content.Context, actionsJson: String) {
+        val notificationManager = context.getSystemService(android.content.Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
+        if (actionsJson.contains("\"DND\"") && !notificationManager.isNotificationPolicyAccessGranted) {
+            android.widget.Toast.makeText(context, "Falta permiso: 'Acceso a No Molestar'", android.widget.Toast.LENGTH_LONG).show()
+            val intent = android.content.Intent(android.provider.Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS)
+            intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+            context.startActivity(intent)
+        }
+        if (actionsJson.contains("\"BRIGHTNESS\"") && !android.provider.Settings.System.canWrite(context)) {
+            android.widget.Toast.makeText(context, "Falta permiso: 'Modificar ajustes del sistema'", android.widget.Toast.LENGTH_LONG).show()
+            val intent = android.content.Intent(android.provider.Settings.ACTION_MANAGE_WRITE_SETTINGS)
+            intent.data = android.net.Uri.parse("package:${context.packageName}")
+            intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+            context.startActivity(intent)
+        }
+    }
 }

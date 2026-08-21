@@ -21,9 +21,15 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import android.content.Context
+import android.content.Intent
+import android.os.PowerManager
+import android.provider.Settings
+import androidx.compose.ui.platform.LocalContext
 import com.droidflow.data.local.HistoryWithFlowName
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -247,22 +253,37 @@ private fun SettingsSection(
                         fontWeight = FontWeight.SemiBold
                     )
                 }
-                
-                var autoStart by remember { mutableStateOf(true) }
-                SettingSwitchItem(
-                    title = "Auto-inicio",
-                    subtitle = "Iniciar al encender dispositivo",
-                    checked = autoStart,
-                    onCheckedChange = { autoStart = it }
-                )
-                
-                var backgroundRun by remember { mutableStateOf(true) }
-                SettingSwitchItem(
-                    title = "Ejecución en segundo plano",
-                    subtitle = "Requerido para disparadores continuos",
-                    checked = backgroundRun,
-                    onCheckedChange = { backgroundRun = it }
-                )
+                                var autoStart by remember { mutableStateOf(true) }
+                  SettingSwitchItem(
+                      title = "Auto-inicio",
+                      subtitle = "Iniciar al encender dispositivo",
+                      checked = autoStart,
+                      onCheckedChange = { autoStart = it }
+                  )
+                  
+                  val context = LocalContext.current
+                  val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
+                  var backgroundRun by remember { 
+                      mutableStateOf(powerManager.isIgnoringBatteryOptimizations(context.packageName)) 
+                  }
+                  
+                  SettingSwitchItem(
+                      title = "Ejecución en segundo plano",
+                      subtitle = "Desactivar optimización de batería",
+                      checked = backgroundRun,
+                      onCheckedChange = { 
+                          if (it && !powerManager.isIgnoringBatteryOptimizations(context.packageName)) {
+                              val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
+                                  data = android.net.Uri.parse("package:${context.packageName}")
+                              }
+                              context.startActivity(intent)
+                          } else if (!it) {
+                              val intent = Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
+                              context.startActivity(intent)
+                          }
+                          backgroundRun = it 
+                      }
+                  )
             }
         }
 

@@ -41,6 +41,41 @@ class FlowEngine @Inject constructor(
         }
     }
 
+    
+    suspend fun evaluateFlows(triggerType: String, params: Map<String, String>) = withContext(Dispatchers.IO) {
+        val flows = flowDao.getAllFlows().firstOrNull() ?: return@withContext
+        val matchingFlows = flows.filter { it.triggerType == triggerType && it.isEnabled }
+        
+        for (flow in matchingFlows) {
+            var shouldExecute = true
+            
+            if (triggerType == "NOTIFICATION") {
+                val conditionsArray = JSONArray(flow.conditionsJson)
+                if (conditionsArray.length() > 0) {
+                    val filter = conditionsArray.getString(0)
+                    val title = params["title"] ?: ""
+                    val text = params["text"] ?: ""
+                    if (!title.contains(filter, ignoreCase = true) && !text.contains(filter, ignoreCase = true)) {
+                        shouldExecute = false
+                    }
+                }
+            } else if (triggerType == "CALL_RECEIVED" || triggerType == "SMS_RECEIVED") {
+                val conditionsArray = JSONArray(flow.conditionsJson)
+                if (conditionsArray.length() > 0) {
+                    val filter = conditionsArray.getString(0)
+                    val number = params["number"] ?: ""
+                    if (filter.isNotEmpty() && !number.contains(filter)) {
+                        shouldExecute = false
+                    }
+                }
+            }
+
+            if (shouldExecute) {
+                evaluateAndExecute(flow.id.toString())
+            }
+        }
+    }
+
     suspend fun evaluateAndExecute(triggerId: String) = withContext(Dispatchers.IO) {
         val flows = flowDao.getAllFlows().firstOrNull() ?: return@withContext
         val flow = flows.find { it.id.toString() == triggerId || it.name == triggerId } ?: return@withContext
@@ -110,7 +145,9 @@ class FlowEngine @Inject constructor(
                         val enable = actionObj.optBoolean("enable", false)
                         BluetoothAction(enable).execute(context)
                     }
-                    "WHATSAPP_SEND" -> WhatsAppAction(actionObj.getString("phoneNumber"), actionObj.getString("message")).execute(context)
+                                        "WHATSAPP_SEND" -> WhatsAppAction(actionObj.getString("phoneNumber"), actionObj.getString("message")).execute(context)
+                    "SYSTEM_BUTTON" -> SystemButtonAction(actionObj.getString("button")).execute(context)
+                    "REJECT_CALL" -> RejectCallAction().execute(context)
                 }
             }
         } catch (e: Exception) {

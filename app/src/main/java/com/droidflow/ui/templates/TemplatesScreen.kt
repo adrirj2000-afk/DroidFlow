@@ -327,6 +327,9 @@ fun TemplatesScreen(
                                 actionsJson = template.actionsJson
                             )
                             viewModel.insertFlow(newFlow)
+                            com.droidflow.utils.PermissionUtils.checkSpecialPermissions(context, template.actionsJson)
+                            showTimeDialog = null
+                            com.droidflow.utils.PermissionUtils.checkSpecialPermissions(context, template.actionsJson)
                             showTimeDialog = null
                             onNavigateHome()
                         }
@@ -374,7 +377,16 @@ fun TemplatesScreen(
                             }
                             if (wifiNetworks.isEmpty()) {
                                 item {
-                                    Text("No se encontraron redes guardadas.", color = MaterialTheme.colorScheme.error)
+                                    Column(modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
+                                        Text("No se encontraron redes. Comprueba que la Ubicación (GPS) esté encendida o escribe el nombre manualmente:", color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+                                        OutlinedTextField(
+                                            value = selectedWifi,
+                                            onValueChange = { selectedWifi = it },
+                                            label = { Text("Nombre exacto del Wi-Fi") },
+                                            singleLine = true,
+                                            modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -393,6 +405,7 @@ fun TemplatesScreen(
                                     actionsJson = template.actionsJson
                                 )
                                 viewModel.insertFlow(newFlow)
+                                com.droidflow.utils.PermissionUtils.checkSpecialPermissions(context, template.actionsJson)
                                 showWifiDialog = null
                                 onNavigateHome()
                             }
@@ -435,6 +448,7 @@ fun TemplatesScreen(
                             actionsJson = template.actionsJson
                         )
                         viewModel.insertFlow(newFlow)
+                        com.droidflow.utils.PermissionUtils.checkSpecialPermissions(context, template.actionsJson)
                         showNameDialog = null
                         onNavigateHome()
                     }) {

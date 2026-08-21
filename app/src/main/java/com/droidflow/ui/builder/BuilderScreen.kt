@@ -80,12 +80,15 @@ fun BuilderScreen(
                     conditionsJson = conditionsJson,
                     actionsJson = combinedJson
                 )
-                onNavigateBack()
+                com.droidflow.utils.PermissionUtils.checkSpecialPermissions(context, combinedJson)
+                    onNavigateBack()
             }
         }
     )
 
     var showAppSelector by remember { mutableStateOf(false) }
+        var showTextDialog by remember { mutableStateOf<String?>(null) }
+        var tempTextValue by remember { mutableStateOf("") }
     var installedApps by remember { mutableStateOf<List<ResolveInfo>>(emptyList()) }
     var appSelectorMode by remember { mutableStateOf(AppSelectorMode.TRIGGER) }
 
@@ -104,7 +107,11 @@ fun BuilderScreen(
     var actionSmsPhone by remember { mutableStateOf("") }
     var actionSmsMessage by remember { mutableStateOf("") }
 
-    val triggers = listOf(
+        val triggers = listOf(
+        Triple("NOTIFICATION", "NotificaciÛn recibida", ""),
+        Triple("CALL_RECEIVED", "Llamada entrante", ""),
+        Triple("SMS_RECEIVED", "SMS recibido", ""),
+        Triple("TIME", "Hora exacta", ""),
         Triple("TIME", "Hora exacta", ""),
         Triple("BATTERY", "Bater√≠a baja", ""),
         Triple("BLUETOOTH", "Conexi√≥n Bluetooth", "[\"Car Audio\"]"),
@@ -122,6 +129,9 @@ fun BuilderScreen(
     )
 
     val actions = listOf(
+        Triple("REJECT_CALL", "Rechazar Llamada", "[{\"type\":\"REJECT_CALL\"}]"),
+        Triple("SYSTEM_BUTTON", "BotÛn del Sistema", ""),
+        Triple("BACKGROUND_SMS", "SMS en Segundo Plano", ""),
         Triple("VIBRATE", "Vibraci√≥n", "[{\"type\":\"VIBRATE\"}]"),
         Triple("NOTIFICATION", "Notificaci√≥n", "[{\"type\":\"NOTIFICATION\"}]"),
         Triple("VOLUME", "Bajar volumen", "[{\"type\":\"VOLUME\", \"level\":0}]"),
@@ -489,7 +499,8 @@ fun BuilderScreen(
                                         conditionsJson = conditionsJson,
                                         actionsJson = combinedJson
                                     )
-                                    onNavigateBack()
+                                    com.droidflow.utils.PermissionUtils.checkSpecialPermissions(context, combinedJson)
+                    onNavigateBack()
                                 }
                             }
                         }
@@ -630,7 +641,54 @@ fun BuilderScreen(
                 }
             }
 
-            if (showBatteryDialog) {
+            
+        if (showTextDialog != null) {
+            val type = showTextDialog!!
+            val title = when (type) {
+                "NOTIFICATION" -> "Filtro de NotificaciÛn (Opcional)"
+                "CALL_RECEIVED" -> "N˙mero de TelÈfono (Opcional)"
+                "SMS_RECEIVED" -> "N˙mero o Nombre (Opcional)"
+                else -> "Filtro"
+            }
+            val label = when (type) {
+                "NOTIFICATION" -> "Palabra clave o Nombre"
+                else -> "Dejar en blanco para cualquiera"
+            }
+            AlertDialog(
+                onDismissRequest = { showTextDialog = null },
+                title = { Text(title) },
+                text = {
+                    OutlinedTextField(
+                        value = tempTextValue,
+                        onValueChange = { tempTextValue = it },
+                        label = { Text(label) },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                },
+                confirmButton = {
+                    TextButton(onClick = {
+                        conditionsJson = "[\"$tempTextValue\"]"
+                        val prefix = when (type) {
+                            "NOTIFICATION" -> "NotificaciÛn de"
+                            "CALL_RECEIVED" -> "Llamada de"
+                            "SMS_RECEIVED" -> "SMS de"
+                            else -> type
+                        }
+                        triggerLabel = if (tempTextValue.isNotBlank()) "$prefix $tempTextValue" else "Cualquier $prefix"
+                        showTextDialog = null
+                    }) {
+                        Text("Aceptar")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showTextDialog = null }) {
+                        Text("Cancelar")
+                    }
+                }
+            )
+        }
+        if (showBatteryDialog) {
                 AlertDialog(
                     onDismissRequest = { showBatteryDialog = false },
                     title = { Text("Nivel de bater√≠a") },

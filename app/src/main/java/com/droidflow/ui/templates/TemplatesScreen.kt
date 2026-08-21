@@ -69,7 +69,7 @@ fun TemplatesScreen(
         Spacer(modifier = Modifier.height(8.dp))
         
         Text(
-            text = "Automatizaciones preconfiguradas diseÃ±adas para optimizar tu dispositivo. Selecciona una plantilla para comenzar.",
+            text = "Automatizaciones preconfiguradas diseÃƒÂ±adas para optimizar tu dispositivo. Selecciona una plantilla para comenzar.",
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -82,7 +82,7 @@ fun TemplatesScreen(
             FilterData("Casa", Icons.Outlined.Home, selectedFilter == "Casa"),
             FilterData("Coche", Icons.Outlined.DirectionsCar, selectedFilter == "Coche"),
             FilterData("Audio", Icons.Outlined.Headphones, selectedFilter == "Audio"),
-            FilterData("BaterÃ­a", Icons.Outlined.BatteryStd, selectedFilter == "BaterÃ­a"),
+            FilterData("BaterÃƒÂ­a", Icons.Outlined.BatteryStd, selectedFilter == "BaterÃƒÂ­a"),
             FilterData("Redes", Icons.Outlined.Wifi, selectedFilter == "Redes")
         )
         
@@ -97,10 +97,10 @@ fun TemplatesScreen(
         
         Spacer(modifier = Modifier.height(24.dp))
         
-        val templates = listOf(
+                val templates = listOf(
             TemplateData(
                 title = "Modo noche",
-                description = "Reduce el brillo, activa no molestar y desactiva el Wi-Fi automÃ¡ticamente segÃºn tu horario.",
+                description = "Reduce el brillo, activa no molestar y desactiva el Wi-Fi automáticamente según tu horario.",
                 icon = Icons.Outlined.Bedtime,
                 iconColor = Color(0xFF7C4DFF),
                 actionsCount = 3,
@@ -114,20 +114,20 @@ fun TemplatesScreen(
             ),
             TemplateData(
                 title = "Ahorro extremo",
-                description = "Si la baterÃ­a baja del 15%, desactiva servicios innecesarios y reduce el tiempo de pantalla.",
+                description = "Si la batería baja del 15%, desactiva servicios innecesarios y reduce el tiempo de pantalla.",
                 icon = Icons.Outlined.BatterySaver,
                 iconColor = Color(0xFFD4BBFF),
                 actionsCount = 3,
                 previewIcons = listOf(Icons.Outlined.BatteryAlert, Icons.Outlined.BluetoothDisabled, Icons.Outlined.BrightnessLow),
                 glowColor = Color(0xFFD4BBFF),
                 isPrimary = false,
-                category = "BaterÃ­a",
+                category = "Batería",
                 triggerType = "BATTERY",
                 conditionsJson = "[\"< 15%\"]",
                 actionsJson = "[{\"type\":\"BLUETOOTH\", \"enable\":false}, {\"type\":\"WIFI\", \"enable\":false}, {\"type\":\"BRIGHTNESS\", \"level\":10}]"
             ),
             TemplateData(
-                title = "Modo conducciÃ³n",
+                title = "Modo conducción",
                 description = "Al conectar al Bluetooth del coche, abre mapas, sube el volumen y lee mensajes en voz alta.",
                 icon = Icons.Outlined.DirectionsCar,
                 iconColor = Color(0xFFCCC2E0),
@@ -138,11 +138,11 @@ fun TemplatesScreen(
                 category = "Coche",
                 triggerType = "BLUETOOTH",
                 conditionsJson = "[]",
-                actionsJson = "[{\"type\":\"OPEN_APP\", \"packageName\":\"com.google.android.apps.maps\"}, {\"type\":\"VOLUME\", \"level\":100}, {\"type\":\"TTS\", \"text\":\"Modo conducciÃ³n activado\"}]"
+                actionsJson = "[{\"type\":\"OPEN_APP\", \"packageName\":\"com.google.android.apps.maps\"}, {\"type\":\"VOLUME\", \"level\":100}, {\"type\":\"TTS\", \"text\":\"Modo conducción activado\"}]"
             ),
             TemplateData(
                 title = "Silenciar en reuniones",
-                description = "Pone el telÃ©fono en vibraciÃ³n rÃ¡pidamente.",
+                description = "Pone el teléfono en vibración rápidamente.",
                 icon = Icons.Outlined.EventBusy,
                 iconColor = Color(0xFF7C4DFF),
                 actionsCount = 1,
@@ -170,7 +170,7 @@ fun TemplatesScreen(
             ),
             TemplateData(
                 title = "Audio Bluetooth",
-                description = "Abre Spotify automÃ¡ticamente al conectar tus auriculares.",
+                description = "Abre Spotify automáticamente al conectar tus auriculares.",
                 icon = Icons.Outlined.Headphones,
                 iconColor = Color(0xFF03A9F4),
                 actionsCount = 1,
@@ -183,7 +183,7 @@ fun TemplatesScreen(
                 actionsJson = "[{\"type\":\"OPEN_APP\", \"packageName\":\"com.spotify.music\"}]"
             ),
             TemplateData(
-                title = "DesconexiÃ³n Total",
+                title = "Desconexión Total",
                 description = "Desactiva todas las conexiones de red con un solo toque.",
                 icon = Icons.Outlined.WifiOff,
                 iconColor = Color(0xFFF44336),
@@ -197,8 +197,8 @@ fun TemplatesScreen(
                 actionsJson = "[{\"type\":\"WIFI\", \"enable\":false}, {\"type\":\"BLUETOOTH\", \"enable\":false}]"
             ),
             TemplateData(
-                title = "OptimizaciÃ³n de BaterÃ­a",
-                description = "Activa el ahorro de energÃ­a durante la noche para evitar consumos inesperados.",
+                title = "Optimización de Batería",
+                description = "Activa el ahorro de energía durante la noche para evitar consumos inesperados.",
                 icon = Icons.Outlined.BatteryAlert,
                 iconColor = Color(0xFFFFC107),
                 actionsCount = 2,
@@ -230,7 +230,7 @@ fun TemplatesScreen(
                 icon = androidx.compose.material.icons.Icons.Outlined.Warning,
                 iconColor = Color(0xFFFF9800),
                 actionsCount = 3,
-                previewIcons = listOf(androidx.compose.material.icons.Icons.Outlined.Notifications, androidx.compose.material.icons.Icons.Outlined.VolumeUp),
+                previewIcons = listOf(androidx.compose.material.icons.Icons.Outlined.Notifications, Icons.Outlined.VolumeUp),
                 glowColor = Color(0xFFFF9800),
                 isPrimary = true,
                 category = "Populares",
@@ -267,7 +267,6 @@ fun TemplatesScreen(
                 actionsJson = "[{\"type\":\"SYSTEM_BUTTON\", \"button\":\"HOME\"}]"
             )
         )
-        
         var showNameDialog by remember { mutableStateOf<TemplateData?>(null) }
         var showWifiDialog by remember { mutableStateOf<TemplateData?>(null) }
         var showTimeDialog by remember { mutableStateOf<TemplateData?>(null) }
@@ -340,7 +339,7 @@ fun TemplatesScreen(
                 title = { Text("Configurar Horario") },
                 text = {
                     Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                        Text("Selecciona cuÃ¡ndo se activa y desactiva '${template.title}'", style = MaterialTheme.typography.bodyMedium)
+                        Text("Selecciona cuÃƒÂ¡ndo se activa y desactiva '${template.title}'", style = MaterialTheme.typography.bodyMedium)
                         
                         OutlinedCard(
                             onClick = { startTimePickerDialog.show() },
@@ -434,7 +433,7 @@ fun TemplatesScreen(
                             if (wifiNetworks.isEmpty()) {
                                 item {
                                     Column(modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
-                                        Text("No se encontraron redes. Comprueba que la UbicaciÃ³n (GPS) estÃ© encendida o escribe el nombre manualmente:", color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+                                        Text("No se encontraron redes. Comprueba que la UbicaciÃƒÂ³n (GPS) estÃƒÂ© encendida o escribe el nombre manualmente:", color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
                                         OutlinedTextField(
                                             value = selectedWifi,
                                             onValueChange = { selectedWifi = it },
@@ -733,4 +732,9 @@ data class TemplateData(
     val conditionsJson: String,
     val actionsJson: String
 )
+
+
+
+
+
 

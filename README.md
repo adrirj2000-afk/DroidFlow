@@ -1,4 +1,4 @@
-﻿# DroidFlow 🤖 ⚡
+# DroidFlow 🤖 ⚡
 
 ![Android](https://img.shields.io/badge/Android-3DDC84?style=for-the-badge&logo=android&logoColor=white)
 ![Kotlin](https://img.shields.io/badge/kotlin-%237F52FF.svg?style=for-the-badge&logo=kotlin&logoColor=white)
@@ -36,6 +36,16 @@ Tareas que el motor ejecutará automáticamente:
 - **Multimedia:** Reproducir/Pausar música, pasar de canción, reproducir sonidos de alerta, Texto-A-Voz (TTS).
 - **Sistema:** Abrir aplicaciones, cambiar fondo de pantalla, bloquear/apagar pantalla.
 - **Avanzado:** Notificaciones personalizadas, vibraciones hápticas, y Peticiones HTTP para integraciones con domótica.
+
+---
+
+## 🌟 Casos de Uso y Plantillas Integradas
+DroidFlow incluye plantillas pre-configuradas listas para usar (y modificar) que demuestran el verdadero poder de la app:
+- 🚫 **Bloqueador de Molestosos**: Rechaza instantáneamente llamadas de números específicos antes de que suenen.
+- 🚨 **Modo SOS**: Dispara el volumen al máximo y enciende la linterna si recibes un WhatsApp con la palabra 'Emergencia'.
+- 💬 **Auto-Respuesta Reunión**: Detecta SMS de contactos clave y les envía una respuesta invisible en segundo plano.
+- 🕵️ **Filtro Anti-Mirones**: Protege tu privacidad. Si alguien abre tu Instagram o Galería, la app fuerza el cierre devolviéndolo a la pantalla de Inicio de forma invisible.
+- 🌙 **Modo Noche**: A las 23:00 apaga tu WiFi, silencia notificaciones y baja el brillo de forma autónoma.
 
 ---
 
